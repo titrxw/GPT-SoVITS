@@ -1,33 +1,38 @@
 # -*- coding: utf-8 -*-
 
 import os
+import argparse
 
-inp_text = os.environ.get("inp_text")
-inp_wav_dir = os.environ.get("inp_wav_dir")
-exp_name = os.environ.get("exp_name")
-i_part = os.environ.get("i_part")
-all_parts = os.environ.get("all_parts")
-os.environ["CUDA_VISIBLE_DEVICES"] = os.environ.get("_CUDA_VISIBLE_DEVICES")
-opt_dir = os.environ.get("opt_dir")
-bert_pretrained_dir = os.environ.get("bert_pretrained_dir")
-is_half = eval(os.environ.get("is_half", "True"))
-import sys, numpy as np, traceback, pdb
+import traceback
 import os.path
-from glob import glob
-from tqdm import tqdm
 from text.cleaner import clean_text
 import torch
 from transformers import AutoModelForMaskedLM, AutoTokenizer
-import numpy as np
 
-# inp_text=sys.argv[1]
-# inp_wav_dir=sys.argv[2]
-# exp_name=sys.argv[3]
-# i_part=sys.argv[4]
-# all_parts=sys.argv[5]
-# os.environ["CUDA_VISIBLE_DEVICES"]=sys.argv[6]#i_gpu
-# opt_dir="/data/docker/liujing04/gpt-vits/fine_tune_dataset/%s"%exp_name
-# bert_pretrained_dir="/data/docker/liujing04/bert-vits2/Bert-VITS2-master20231106/bert/chinese-roberta-wwm-ext-large"
+
+parser = argparse.ArgumentParser(description="GPT-SoVITS tool")
+
+parser.add_argument("", "--inp_text", type=str, default="", help="asr 文件地址")
+parser.add_argument("", "--inp_audio_dir", type=str, default="", help="音频文件目录")
+parser.add_argument("", "--model_name", type=str, default="", help="模型名称")
+parser.add_argument("", "--i_part", type=str, default="", help="part")
+parser.add_argument("", "--all_parts", type=str, default="", help="all_parts")
+parser.add_argument("", "--opt_dir", type=str, default="", help="opt_dir")
+parser.add_argument("", "--bert_pretrained_dir", type=str, default="", help="bert_pretrained_dir")
+parser.add_argument("", "--is_half", type=str, default="", help="is_half")
+parser.add_argument("", "--gpus", type=str, default="0", help="gpus")
+args = parser.parse_args()
+
+inp_text = args.inp_text
+inp_wav_dir = args.inp_audio_dir
+exp_name = args.model_name
+i_part = args.i_part
+all_parts = args.all_parts
+opt_dir = args.opt_dir
+bert_pretrained_dir = args.bert_pretrained_dir
+is_half = eval(args.is_half)
+gpus = args.gpus
+
 
 from time import time as ttime
 import shutil
@@ -48,7 +53,7 @@ if os.path.exists(txt_path) == False:
     os.makedirs(opt_dir, exist_ok=True)
     os.makedirs(bert_dir, exist_ok=True)
     if torch.cuda.is_available():
-        device = "cuda:0"
+        device = "cuda:" + gpus
     # elif torch.backends.mps.is_available():
     #     device = "mps"
     else:

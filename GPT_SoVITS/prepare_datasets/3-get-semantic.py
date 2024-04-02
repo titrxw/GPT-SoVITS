@@ -1,36 +1,37 @@
 import os
+import argparse
 
-inp_text = os.environ.get("inp_text")
-exp_name = os.environ.get("exp_name")
-i_part = os.environ.get("i_part")
-all_parts = os.environ.get("all_parts")
-os.environ["CUDA_VISIBLE_DEVICES"] = os.environ.get("_CUDA_VISIBLE_DEVICES")
-opt_dir = os.environ.get("opt_dir")
-pretrained_s2G = os.environ.get("pretrained_s2G")
-s2config_path = os.environ.get("s2config_path")
-is_half = eval(os.environ.get("is_half", "True"))
-import math, traceback
-import multiprocessing
-import sys, pdb
+import traceback
+import sys
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-from random import shuffle
-import torch.multiprocessing as mp
-from glob import glob
-from tqdm import tqdm
 import logging, librosa, utils, torch
 from module.models import SynthesizerTrn
 
 logging.getLogger("numba").setLevel(logging.WARNING)
-# from config import pretrained_s2G
 
-# inp_text=sys.argv[1]
-# exp_name=sys.argv[2]
-# i_part=sys.argv[3]
-# all_parts=sys.argv[4]
-# os.environ["CUDA_VISIBLE_DEVICES"]=sys.argv[5]
-# opt_dir="/data/docker/liujing04/gpt-vits/fine_tune_dataset/%s"%exp_name
+parser = argparse.ArgumentParser(description="GPT-SoVITS tool")
+parser.add_argument("", "--inp_text", type=str, default="", help="asr 文件地址")
+parser.add_argument("", "--model_name", type=str, default="", help="模型名称")
+parser.add_argument("", "--i_part", type=str, default="", help="part")
+parser.add_argument("", "--all_parts", type=str, default="", help="all_parts")
+parser.add_argument("", "--opt_dir", type=str, default="", help="opt_dir")
+parser.add_argument("", "--pretrained_s2G", type=str, default="", help="pretrained_s2G")
+parser.add_argument("", "--s2config_path", type=str, default="", help="s2config_path")
+parser.add_argument("", "--is_half", type=str, default="", help="is_half")
+parser.add_argument("", "--gpus", type=str, default="0", help="gpus")
+args = parser.parse_args()
+
+inp_text = args.inp_text
+exp_name = args.model_name
+i_part = args.i_part
+all_parts = args.all_parts
+opt_dir = args.opt_dir
+pretrained_s2G = args.pretrained_s2G
+s2config_path = args.s2config_path
+is_half = eval(args.is_half)
+gpus = args.gpus
 
 
 hubert_dir = "%s/4-cnhubert" % (opt_dir)
@@ -39,7 +40,7 @@ if os.path.exists(semantic_path) == False:
     os.makedirs(opt_dir, exist_ok=True)
 
     if torch.cuda.is_available():
-        device = "cuda"
+        device = "cuda:" + gpus
     # elif torch.backends.mps.is_available():
     #     device = "mps"
     else:
