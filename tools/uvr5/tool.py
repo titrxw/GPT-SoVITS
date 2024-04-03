@@ -14,13 +14,13 @@ from vr import AudioPre, AudioPreDeEcho
 weight_uvr5_root = "tools/uvr5/uvr5_weights"
 
 parser = argparse.ArgumentParser(description="GPT-SoVITS uvr5 tool")
-parser.add_argument("", "--model_name", type=str, default="HP2_all_vocals", help="model_name")
-parser.add_argument("", "--inp_root", type=str, default="", help="inp_root")
-parser.add_argument("", "--opt_root", type=str, default="", help="opt_root")
-parser.add_argument("", "--agg", type=int, default="10", help="agg")
-parser.add_argument("", "--format", type=str, default="wav", help="format")
-parser.add_argument("", "--is_half", type=str, default="", help="is_half")
-parser.add_argument("", "--device", type=str, default="", help="device")
+parser.add_argument("-m", "--model_name", type=str, default="HP2_all_vocals", help="model_name")
+parser.add_argument("-i", "--inp_root", type=str, default="", help="inp_root")
+parser.add_argument("-o", "--opt_root", type=str, default="", help="opt_root")
+parser.add_argument("-a", "--agg", type=int, default="10", help="agg")
+parser.add_argument("-f", "--format", type=str, default="wav", help="format")
+parser.add_argument("-ih", "--is_half", type=str, default="", help="is_half")
+parser.add_argument("-d", "--device", type=str, default="", help="device")
 args = parser.parse_args()
 
 inp_root=args.inp_root
