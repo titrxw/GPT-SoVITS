@@ -9,6 +9,8 @@
 import os,re, logging
 import LangSegment
 import argparse
+from io import BytesIO
+import soundfile as sf
 
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 import numpy as np
@@ -45,6 +47,7 @@ parser.add_argument("-pt", "--prompt_text", type=str, default="", help="prompt_t
 parser.add_argument("-pl", "--prompt_language", type=str, default="", help="prompt_language")
 parser.add_argument("-t", "--text", type=str, default="", help="text")
 parser.add_argument("-tl", "--text_language", type=str, default="", help="text_language")
+parser.add_argument("-o", "--out_path", type=str, default="", help="out_path")
 parser.add_argument("-hc", "--how_to_cut", type=str, default="chinese_period", help="how_to_cut")
 parser.add_argument("-ih", "--is_half", type=str, default="", help="is_half")
 parser.add_argument("-g", "--gpus", type=str, default="0", help="gpus")
@@ -59,6 +62,7 @@ prompt_text=args.prompt_text
 prompt_language=args.prompt_language
 text=args.text
 text_language=args.text_language
+out_path = args.out_path
 how_to_cut=args.how_to_cut
 is_half = eval(args.is_half)
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
@@ -306,7 +310,7 @@ def merge_short_text_in_array(texts, threshold):
     return result
 
 
-def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="none", top_k=20,
+def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, out_path, how_to_cut="none", top_k=20,
                 top_p=0.6, temperature=0.6, ref_free=False):
     if prompt_text is None or len(prompt_text) == 0:
         ref_free = True
@@ -364,6 +368,7 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
     texts = text.split("\n")
     texts = merge_short_text_in_array(texts, 5)
     audio_opt = []
+    audio_bytes = BytesIO()
     if not ref_free:
         phones1, bert1, norm_text1 = get_phones_and_bert(prompt_text, prompt_language)
 
@@ -399,7 +404,6 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
                 temperature=temperature,
                 early_stop_num=hz * max_sec,
             )
-        t3 = ttime()
         # print(pred_semantic.shape,idx)
         pred_semantic = pred_semantic[:, -idx:].unsqueeze(
             0
@@ -418,16 +422,28 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
             .cpu()
             .numpy()[0, 0]
         )  ###试试重建不带上prompt部分
-        max_audio = np.abs(audio).max()  # 简单防止16bit爆音
-        if max_audio > 1: audio /= max_audio
         audio_opt.append(audio)
         audio_opt.append(zero_wav)
-        t4 = ttime()
-    print("%.3f\t%.3f\t%.3f\t%.3f" % (t1 - t0, t2 - t1, t3 - t2, t4 - t3))
-    yield hps.data.sampling_rate, (np.concatenate(audio_opt, 0) * 32768).astype(
-        np.int16
-    )
+        audio_bytes = pack_raw(audio_bytes, (np.concatenate(audio_opt, 0) * 32768).astype(np.int16),
+                                 hps.data.sampling_rate)
 
+    audio_bytes = pack_wav(audio_bytes, hps.data.sampling_rate)
+    file = open(out_path, 'wb')
+    file.write(audio_bytes.getvalue())
+    file.close()
+
+
+def pack_raw(audio_bytes, data, rate):
+    audio_bytes.write(data.tobytes())
+
+    return audio_bytes
+
+def pack_wav(audio_bytes, rate):
+    data = np.frombuffer(audio_bytes.getvalue(),dtype=np.int16)
+    wav_bytes = BytesIO()
+    sf.write(wav_bytes, data, rate, format='wav')
+
+    return wav_bytes
 
 def split(todo_text):
     todo_text = todo_text.replace("……", "。").replace("——", "，")
@@ -519,4 +535,4 @@ def custom_sort_key(s):
     return parts
 
 
-get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, 10, 0.1, 0.6, False)
+get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, out_path, how_to_cut, 10, 0.1, 0.6, False)
