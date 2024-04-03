@@ -30,7 +30,7 @@ all_parts = args.all_parts
 opt_dir = args.opt_dir
 cnhubert.cnhubert_base_path = args.cnhubert_base_dir
 is_half = eval(args.is_half)
-gpus = args.gpus
+os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
 
 
@@ -53,7 +53,7 @@ os.makedirs(wav32dir,exist_ok=True)
 maxx=0.95
 alpha=0.5
 if torch.cuda.is_available():
-    device = "cuda:" + gpus
+    device = "cuda:0"
 # elif torch.backends.mps.is_available():
 #     device = "mps"
 else:

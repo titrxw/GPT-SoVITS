@@ -31,7 +31,7 @@ opt_dir = args.opt_dir
 pretrained_s2G = args.pretrained_s2G
 s2config_path = args.s2config_path
 is_half = eval(args.is_half)
-gpus = args.gpus
+os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
 
 hubert_dir = "%s/4-cnhubert" % (opt_dir)
@@ -40,7 +40,7 @@ if os.path.exists(semantic_path) == False:
     os.makedirs(opt_dir, exist_ok=True)
 
     if torch.cuda.is_available():
-        device = "cuda:" + gpus
+        device = "cuda:0"
     # elif torch.backends.mps.is_available():
     #     device = "mps"
     else:

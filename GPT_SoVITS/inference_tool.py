@@ -6,7 +6,7 @@
 全部按英文识别
 全部按日文识别
 '''
-import re, logging
+import os,re, logging
 import LangSegment
 import argparse
 
@@ -61,12 +61,12 @@ text=args.text
 text_language=args.text_language
 how_to_cut=args.how_to_cut
 is_half = eval(args.is_half)
-gpus = args.gpus
+os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
 i18n = I18nAuto()
 
 if torch.cuda.is_available():
-    device = "cuda:" + gpus
+    device = "cuda:0"
 else:
     device = "cpu"
 

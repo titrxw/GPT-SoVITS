@@ -31,7 +31,7 @@ all_parts = args.all_parts
 opt_dir = args.opt_dir
 bert_pretrained_dir = args.bert_pretrained_dir
 is_half = eval(args.is_half)
-gpus = args.gpus
+os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
 
 from time import time as ttime
@@ -53,7 +53,7 @@ if os.path.exists(txt_path) == False:
     os.makedirs(opt_dir, exist_ok=True)
     os.makedirs(bert_dir, exist_ok=True)
     if torch.cuda.is_available():
-        device = "cuda:" + gpus
+        device = "cuda:0"
     # elif torch.backends.mps.is_available():
     #     device = "mps"
     else:
