@@ -51,6 +51,9 @@ parser.add_argument("-o", "--out_path", type=str, default="", help="out_path")
 parser.add_argument("-hc", "--how_to_cut", type=str, default="chinese_period", help="how_to_cut")
 parser.add_argument("-ih", "--is_half", type=str, default="", help="is_half")
 parser.add_argument("-g", "--gpus", type=str, default="0", help="gpus")
+parser.add_argument("-tk", "--top_k", type=str, default="10", help="top_k")
+parser.add_argument("-tp", "--top_p", type=str, default="0.1", help="top_p")
+parser.add_argument("-tmp", "--temperature", type=str, default="0.6", help="temperature")
 args = parser.parse_args()
 
 gpt_path=args.gpt_path
@@ -64,6 +67,9 @@ text=args.text
 text_language=args.text_language
 out_path = args.out_path
 how_to_cut=args.how_to_cut
+top_k=args.top_k
+top_p=args.top_p
+temperature=args.temperature
 is_half = eval(args.is_half)
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
@@ -535,4 +541,4 @@ def custom_sort_key(s):
     return parts
 
 
-get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, out_path, how_to_cut, 10, 0.1, 0.6, False)
+get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, out_path, how_to_cut, top_k, top_p, temperature, False)
