@@ -67,9 +67,9 @@ text=args.text
 text_language=args.text_language
 out_path = args.out_path
 how_to_cut=args.how_to_cut
-top_k=args.top_k
-top_p=args.top_p
-temperature=args.temperature
+top_k=int(args.top_k)
+top_p=float(args.top_p)
+temperature=float(args.temperature)
 is_half = eval(args.is_half)
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
