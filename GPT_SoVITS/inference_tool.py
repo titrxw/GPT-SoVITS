@@ -76,7 +76,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 i18n = I18nAuto()
 
 if torch.cuda.is_available():
-    device = "cuda:0"
+    device = "cuda"
 else:
     device = "cpu"
 

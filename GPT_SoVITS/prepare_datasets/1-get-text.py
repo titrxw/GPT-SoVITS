@@ -53,7 +53,7 @@ if os.path.exists(txt_path) == False:
     os.makedirs(opt_dir, exist_ok=True)
     os.makedirs(bert_dir, exist_ok=True)
     if torch.cuda.is_available():
-        device = "cuda:0"
+        device = "cuda"
     # elif torch.backends.mps.is_available():
     #     device = "mps"
     else:

@@ -53,7 +53,7 @@ os.makedirs(wav32dir,exist_ok=True)
 maxx=0.95
 alpha=0.5
 if torch.cuda.is_available():
-    device = "cuda:0"
+    device = "cuda"
 # elif torch.backends.mps.is_available():
 #     device = "mps"
 else:
