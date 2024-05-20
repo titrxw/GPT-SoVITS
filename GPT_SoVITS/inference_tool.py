@@ -240,6 +240,9 @@ def get_first(text):
     return text
 
 
+def only_punc(text):
+    return not any(t.isalnum() or t.isalpha() for t in text)
+
 def get_phones_and_bert(text, language):
     if language in {"en", "all_zh", "all_ja"}:
         language = language.replace("all_", "")
@@ -380,8 +383,9 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
 
     for text in texts:
         # 解决输入目标文本的空行导致报错的问题
-        if (len(text.strip()) == 0):
+        if len(text.strip()) == 0 or only_punc(text):
             continue
+
         if (text[-1] not in splits): text += "。" if text_language != "en" else "."
         print(i18n("实际输入的目标文本(每句):"), text)
         phones2, bert2, norm_text2 = get_phones_and_bert(text, text_language)
