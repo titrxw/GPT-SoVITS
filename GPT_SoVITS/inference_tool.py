@@ -319,7 +319,7 @@ def merge_short_text_in_array(texts, threshold):
     return result
 
 
-def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, out_path, how_to_cut="none", top_k=20,
+def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="none", top_k=20,
                 top_p=0.6, temperature=0.6, ref_free=False):
     if prompt_text is None or len(prompt_text) == 0:
         ref_free = True
@@ -434,26 +434,10 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
         )  ###试试重建不带上prompt部分
         audio_opt.append(audio)
         audio_opt.append(zero_wav)
-        audio_bytes = pack_raw(audio_bytes, (np.concatenate(audio_opt, 0) * 32768).astype(np.int16),
-                                 hps.data.sampling_rate)
 
-    audio_bytes = pack_wav(audio_bytes, hps.data.sampling_rate)
-    file = open(out_path, 'wb')
-    file.write(audio_bytes.getvalue())
-    file.close()
-
-
-def pack_raw(audio_bytes, data, rate):
-    audio_bytes.write(data.tobytes())
-
-    return audio_bytes
-
-def pack_wav(audio_bytes, rate):
-    data = np.frombuffer(audio_bytes.getvalue(),dtype=np.int16)
-    wav_bytes = BytesIO()
-    sf.write(wav_bytes, data, rate, format='wav')
-
-    return wav_bytes
+    yield hps.data.sampling_rate, (np.concatenate(audio_opt, 0) * 32768).astype(
+        np.int16
+    )
 
 def split(todo_text):
     todo_text = todo_text.replace("……", "。").replace("——", "，")
@@ -545,4 +529,9 @@ def custom_sort_key(s):
     return parts
 
 
-get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, out_path, how_to_cut, top_k, top_p, temperature, False)
+synthesis_result = get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, False)
+result_list = list(synthesis_result)
+
+if result_list:
+    last_sampling_rate, last_audio_data = result_list[-1]
+    sf.write(out_path, last_audio_data, last_sampling_rate)
