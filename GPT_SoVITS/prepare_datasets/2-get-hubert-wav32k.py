@@ -8,7 +8,7 @@ from scipy.io import wavfile
 import librosa,torch
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-from my_utils import load_audio
+from tools.my_utils import load_audio
 
 parser = argparse.ArgumentParser(description="GPT-SoVITS tool")
 parser.add_argument("-it", "--inp_text", type=str, default="", help="asr 文件地址")
