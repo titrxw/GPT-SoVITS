@@ -132,6 +132,7 @@ def run(rank, n_gpus, hps):
         hps.data.filter_length // 2 + 1,
         hps.train.segment_size // hps.data.hop_length,
         n_speakers=hps.data.n_speakers,
+        version=hps.version,
         **hps.model,
     ).cuda(rank) if torch.cuda.is_available() else SynthesizerTrn(
         hps.data.filter_length // 2 + 1,

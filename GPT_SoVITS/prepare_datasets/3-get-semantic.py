@@ -21,7 +21,7 @@ parser.add_argument("-ps", "--pretrained_s2G", type=str, default="", help="pretr
 parser.add_argument("-sp", "--s2config_path", type=str, default="", help="s2config_path")
 parser.add_argument("-ih", "--is_half", type=str, default="", help="is_half")
 parser.add_argument("-g", "--gpus", type=str, default="0", help="gpus")
-parser.add_argument("-v", "--version", type=str, default="v2", help="version")
+parser.add_argument("-v", "--version", type=str, default="v1", help="version")
 args = parser.parse_args()
 
 inp_text = args.inp_text
