@@ -8,7 +8,7 @@ now_dir = os.getcwd()
 sys.path.append(now_dir)
 import logging, librosa, utils, torch
 from module.models import SynthesizerTrn
-
+from tools.my_utils import clean_path
 logging.getLogger("numba").setLevel(logging.WARNING)
 
 parser = argparse.ArgumentParser(description="GPT-SoVITS tool")
@@ -21,6 +21,7 @@ parser.add_argument("-ps", "--pretrained_s2G", type=str, default="", help="pretr
 parser.add_argument("-sp", "--s2config_path", type=str, default="", help="s2config_path")
 parser.add_argument("-ih", "--is_half", type=str, default="", help="is_half")
 parser.add_argument("-g", "--gpus", type=str, default="0", help="gpus")
+parser.add_argument("-v", "--version", type=str, default="v2", help="version")
 args = parser.parse_args()
 
 inp_text = args.inp_text
@@ -32,7 +33,10 @@ pretrained_s2G = args.pretrained_s2G
 s2config_path = args.s2config_path
 is_half = eval(args.is_half)
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+version = args.version
 
+if os.path.exists(pretrained_s2G):...
+else:raise FileNotFoundError(pretrained_s2G)
 
 hubert_dir = "%s/4-cnhubert" % (opt_dir)
 semantic_path = "%s/6-name2semantic-%s.tsv" % (opt_dir, i_part)
@@ -50,6 +54,7 @@ if os.path.exists(semantic_path) == False:
         hps.data.filter_length // 2 + 1,
         hps.train.segment_size // hps.data.hop_length,
         n_speakers=hps.data.n_speakers,
+        version=version,
         **hps.model
     )
     if is_half == True:
@@ -87,6 +92,7 @@ if os.path.exists(semantic_path) == False:
         try:
             # wav_name,text=line.split("\t")
             wav_name, spk_name, language, text = line.split("|")
+            wav_name=clean_path(wav_name)
             wav_name = os.path.basename(wav_name)
             # name2go(name,lines1)
             name2go(wav_name, lines1)

@@ -8,7 +8,7 @@ from scipy.io import wavfile
 import librosa,torch
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-from tools.my_utils import load_audio
+from tools.my_utils import load_audio,clean_path
 
 parser = argparse.ArgumentParser(description="GPT-SoVITS tool")
 parser.add_argument("-it", "--inp_text", type=str, default="", help="asr 文件地址")
@@ -103,6 +103,7 @@ for line in lines[int(i_part)::int(all_parts)]:
     try:
         # wav_name,text=line.split("\t")
         wav_name, spk_name, language, text = line.split("|")
+        wav_name=clean_path(wav_name)
         if (inp_wav_dir != "" and inp_wav_dir != None):
             wav_name = os.path.basename(wav_name)
             wav_path = "%s/%s"%(inp_wav_dir, wav_name)

@@ -8,7 +8,7 @@ import os.path
 from text.cleaner import clean_text
 import torch
 from transformers import AutoModelForMaskedLM, AutoTokenizer
-
+from tools.my_utils import clean_path
 
 parser = argparse.ArgumentParser(description="GPT-SoVITS tool")
 
@@ -21,7 +21,9 @@ parser.add_argument("-o", "--opt_dir", type=str, default="", help="opt_dir")
 parser.add_argument("-btd", "--bert_pretrained_dir", type=str, default="", help="bert_pretrained_dir")
 parser.add_argument("-ih", "--is_half", type=str, default="", help="is_half")
 parser.add_argument("-g", "--gpus", type=str, default="0", help="gpus")
+parser.add_argument("-v", "--version", type=str, default=None, help="version")
 args = parser.parse_args()
+
 
 inp_text = args.inp_text
 inp_wav_dir = args.inp_audio_dir
@@ -32,6 +34,7 @@ opt_dir = args.opt_dir
 bert_pretrained_dir = args.bert_pretrained_dir
 is_half = eval(args.is_half)
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+version = args.version
 
 
 from time import time as ttime
@@ -58,6 +61,8 @@ if os.path.exists(txt_path) == False:
     #     device = "mps"
     else:
         device = "cpu"
+    if os.path.exists(bert_pretrained_dir):...
+    else:raise FileNotFoundError(bert_pretrained_dir)
     tokenizer = AutoTokenizer.from_pretrained(bert_pretrained_dir)
     bert_model = AutoModelForMaskedLM.from_pretrained(bert_pretrained_dir)
     if is_half == True:
@@ -86,9 +91,11 @@ if os.path.exists(txt_path) == False:
     def process(data, res):
         for name, text, lan in data:
             try:
+                name=clean_path(name)
                 name = os.path.basename(name)
+                print(name)
                 phones, word2ph, norm_text = clean_text(
-                    text.replace("%", "-").replace("￥", ","), lan
+                    text.replace("%", "-").replace("￥", ","), lan, version
                 )
                 path_bert = "%s/%s.pt" % (bert_dir, name)
                 if os.path.exists(path_bert) == False and lan == "zh":
@@ -117,6 +124,12 @@ if os.path.exists(txt_path) == False:
         "EN": "en",
         "en": "en",
         "En": "en",
+        "KO": "ko",
+        "Ko": "ko",
+        "ko": "ko",
+        "yue": "yue",
+        "YUE": "yue",
+        "Yue": "yue",
     }
     for line in lines[int(i_part) :: int(all_parts)]:
         try:
